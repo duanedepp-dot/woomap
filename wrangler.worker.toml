@@ -1,0 +1,15 @@
+name = "woomap"
+compatibility_date = "2026-10-12"
+
+[assets]
+directory = "./dist"
+not_found_handling = "single-page-application"
+
+# Isolated preview: no Supabase connection until a staging project is configured.
+[previews.vars]
+VITE_SUPABASE_URL = ""
+VITE_SUPABASE_PUBLISHABLE_KEY = ""
+
+[[previews.kv_namespaces]]
+binding = "TERRALIVE_CACHE"
+id = "a3f1a0d2321e4cd5a0881a65ce6e4ee8"
