@@ -47,7 +47,7 @@ jobs:
         run: |
           if [ -z "$TERRALIVE_TEST_SUPABASE_URL" ] || [ -z "$TERRALIVE_TEST_SUPABASE_KEY" ] || [ -z "$TERRALIVE_TEST_USER_A_EMAIL" ] || [ -z "$TERRALIVE_TEST_USER_A_PASSWORD" ] || [ -z "$TERRALIVE_TEST_USER_B_EMAIL" ] || [ -z "$TERRALIVE_TEST_USER_B_PASSWORD" ]; then
             echo "::warning::Two-account integration test skipped: configure all TERRALIVE_TEST_* repository secrets for a dedicated staging project."
-            echo "Build passed, but this does not count as a passing live security test."
-            exit 0
+            echo "::error::Two-account test is a required release gate; configure all TERRALIVE_TEST_* secrets for a dedicated staging project."
+            exit 1
           fi
           npm run test:terralive-security
