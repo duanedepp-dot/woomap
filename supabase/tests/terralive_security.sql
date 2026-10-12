@@ -17,6 +17,7 @@ begin
     raise exception 'FAIL: owner/actor-only revision RLS policy is missing';
   end if;
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='buildings' and policyname='Update own buildings') then raise exception 'FAIL: owner update policy is missing'; end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='buildings' and column_name='status' and position('published' in coalesce(column_default,'')) > 0) then raise exception 'FAIL: new buildings should default to published'; end if;
   if (select column_default from information_schema.columns where table_schema='public' and table_name='buildings' and column_name='status') not like '%published%' then
     raise exception 'FAIL: new buildings must default to published for immediate publishing';
   end if;
