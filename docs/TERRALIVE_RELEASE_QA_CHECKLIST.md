@@ -1,11 +1,11 @@
-# TerraLive release and QA checklist
+# WooMap release and QA checklist
 
 Use this checklist for each preview and production release. Record the date, deployment URL, commit, tester, and results in the pull request.
 
 ## Build and configuration
 - [ ] CI lint/typecheck/build pass.
 - [ ] Production Pages environment uses the intended Supabase URL and public publishable key from Cloudflare Pages settings.
-- [ ] Branch preview environment uses non-production placeholder Supabase values and VITE_TERRALIVE_PREVIEW_READ_ONLY=true until a dedicated staging project is configured.
+- [ ] Branch preview environment uses non-production placeholder Supabase values and VITE_WOOMAP_PREVIEW_READ_ONLY=true until a dedicated staging project is configured.
 - [ ] Preview and production use separate KV namespaces.
 - [ ] Worker preview uses wrangler.worker.toml and its isolated preview KV namespace; it must not use production Supabase credentials.
 - [ ] No service-role key or private API key appears in the browser bundle, Git history, logs, or public config.
@@ -29,7 +29,7 @@ Use this checklist for each preview and production release. Record the date, dep
 - [ ] Revision history contains no editor email or unnecessary personal data.
 - [ ] Deleted building history remains accessible to the owner via snapshot owner ID.
 - [ ] Table grants and RLS policies are both reviewed; policy existence alone is not sufficient.
-- [ ] Run supabase/tests/terralive_security.sql after migrations.
+- [ ] Run supabase/tests/woomap_security.sql after migrations.
 - [ ] Behavioral allow/deny tests cover select/insert/update/delete for anon, owner, and non-owner.
 
 ## Map and addresses
@@ -90,14 +90,14 @@ Run only against a disposable/staging Supabase project after applying the revisi
 Apply supabase/schema.sql for a fresh local database, or apply migrations 202610120001_revision_privacy_rls.sql and 202610120002_publish_immediately.sql to the intended existing staging database before testing. Confirm the project and backup first.
 
 Set these environment variables locally or as protected CI secrets (never commit credentials):
-- TERRALIVE_TEST_SUPABASE_URL
-- TERRALIVE_TEST_SUPABASE_KEY (publishable/anon key only; never service-role)
-- TERRALIVE_TEST_USER_A_EMAIL
-- TERRALIVE_TEST_USER_A_PASSWORD
-- TERRALIVE_TEST_USER_B_EMAIL
-- TERRALIVE_TEST_USER_B_PASSWORD
+- WOOMAP_TEST_SUPABASE_URL
+- WOOMAP_TEST_SUPABASE_KEY (publishable/anon key only; never service-role)
+- WOOMAP_TEST_USER_A_EMAIL
+- WOOMAP_TEST_USER_A_PASSWORD
+- WOOMAP_TEST_USER_B_EMAIL
+- WOOMAP_TEST_USER_B_PASSWORD
 
-Then run: npm run test:terralive-security
+Then run: npm run test:woomap-security
 
 The script creates a uniquely named published fixture, tests RLS and live cross-account edits, then deletes that fixture and checks that its revision history remains private. It must pass before this PR is considered release-ready.
 
