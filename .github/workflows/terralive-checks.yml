@@ -1,15 +1,15 @@
-name: TerraLive checks
+name: WooMap checks
 
 on:
   pull_request:
     branches: [main]
   push:
-    branches: [main, fix/terralive-supabase-build-env]
+    branches: [main, fix/woomap-supabase-build-env]
   workflow_dispatch:
 
 jobs:
-  build:
-    name: TypeScript and production build
+  woomap-build:
+    name: WooMap TypeScript and production build
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -23,10 +23,10 @@ jobs:
       - name: Build application
         run: npm run build
 
-  two-account-security:
-    name: Two-account Supabase authorization and Realtime test
+  woomap-two-account-security:
+    name: WooMap two-account Supabase authorization and Realtime test
     runs-on: ubuntu-latest
-    needs: build
+    needs: woomap-build
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -38,16 +38,16 @@ jobs:
         run: npm install
       - name: Run two-account integration test when staging credentials are configured
         env:
-          TERRALIVE_TEST_SUPABASE_URL: ${{ secrets.TERRALIVE_TEST_SUPABASE_URL }}
-          TERRALIVE_TEST_SUPABASE_KEY: ${{ secrets.TERRALIVE_TEST_SUPABASE_KEY }}
-          TERRALIVE_TEST_USER_A_EMAIL: ${{ secrets.TERRALIVE_TEST_USER_A_EMAIL }}
-          TERRALIVE_TEST_USER_A_PASSWORD: ${{ secrets.TERRALIVE_TEST_USER_A_PASSWORD }}
-          TERRALIVE_TEST_USER_B_EMAIL: ${{ secrets.TERRALIVE_TEST_USER_B_EMAIL }}
-          TERRALIVE_TEST_USER_B_PASSWORD: ${{ secrets.TERRALIVE_TEST_USER_B_PASSWORD }}
+          WOOMAP_TEST_SUPABASE_URL: ${{ secrets.WOOMAP_TEST_SUPABASE_URL }}
+          WOOMAP_TEST_SUPABASE_KEY: ${{ secrets.WOOMAP_TEST_SUPABASE_KEY }}
+          WOOMAP_TEST_USER_A_EMAIL: ${{ secrets.WOOMAP_TEST_USER_A_EMAIL }}
+          WOOMAP_TEST_USER_A_PASSWORD: ${{ secrets.WOOMAP_TEST_USER_A_PASSWORD }}
+          WOOMAP_TEST_USER_B_EMAIL: ${{ secrets.WOOMAP_TEST_USER_B_EMAIL }}
+          WOOMAP_TEST_USER_B_PASSWORD: ${{ secrets.WOOMAP_TEST_USER_B_PASSWORD }}
         run: |
-          if [ -z "$TERRALIVE_TEST_SUPABASE_URL" ] || [ -z "$TERRALIVE_TEST_SUPABASE_KEY" ] || [ -z "$TERRALIVE_TEST_USER_A_EMAIL" ] || [ -z "$TERRALIVE_TEST_USER_A_PASSWORD" ] || [ -z "$TERRALIVE_TEST_USER_B_EMAIL" ] || [ -z "$TERRALIVE_TEST_USER_B_PASSWORD" ]; then
-            echo "::warning::Two-account integration test skipped: configure all TERRALIVE_TEST_* repository secrets for a dedicated staging project."
-            echo "::error::Two-account test is a required release gate; configure all TERRALIVE_TEST_* secrets for a dedicated staging project."
+          if [ -z "$WOOMAP_TEST_SUPABASE_URL" ] || [ -z "$WOOMAP_TEST_SUPABASE_KEY" ] || [ -z "$WOOMAP_TEST_USER_A_EMAIL" ] || [ -z "$WOOMAP_TEST_USER_A_PASSWORD" ] || [ -z "$WOOMAP_TEST_USER_B_EMAIL" ] || [ -z "$WOOMAP_TEST_USER_B_PASSWORD" ]; then
+            echo "::warning::Two-account integration test skipped: configure all WOOMAP_TEST_* repository secrets for a dedicated staging project."
+            echo "::error::Two-account test is a required release gate; configure all WOOMAP_TEST_* secrets for a dedicated staging project."
             exit 1
           fi
-          npm run test:terralive-security
+          npm run test:woomap-security
