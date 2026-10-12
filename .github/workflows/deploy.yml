@@ -8,6 +8,7 @@ permissions:
 
 jobs:
   build-and-deploy:
+    if: github.ref == 'refs/heads/main'
     name: WooMap production build and manual Pages deploy
     runs-on: ubuntu-latest
     steps:
