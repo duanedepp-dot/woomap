@@ -7,7 +7,7 @@ create table if not exists public.buildings (
  building_type text not null default 'Apartment' check(building_type in ('Apartment','House','Office','Commercial building')),
  height_m double precision not null default 10 check(height_m>0 and height_m<=1000),
  footprint_geojson jsonb not null, footprint extensions.geometry(Polygon,4326) not null,
- status text not null default 'draft' check(status in ('draft','published')), revision integer not null default 1,
+ status text not null default 'published' check(status in ('draft','published')), revision integer not null default 1,
  created_at timestamptz not null default now(), updated_at timestamptz not null default now(),
  constraint valid_polygon_json check(footprint_geojson->>'type'='Polygon'));
 create index if not exists buildings_footprint_gix on public.buildings using gist(footprint);
