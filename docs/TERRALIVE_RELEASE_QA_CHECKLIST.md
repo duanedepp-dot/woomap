@@ -5,6 +5,7 @@ Use this checklist for each preview and production release. Record the date, dep
 ## Build and configuration
 - [ ] CI lint/typecheck/build pass.
 - [ ] Preview and production use the intended Supabase URL and public publishable key.
+- [ ] Worker preview uses wrangler.worker.toml and its isolated preview KV namespace; it must not use production Supabase credentials.
 - [ ] No service-role key or private API key appears in the browser bundle, Git history, logs, or public config.
 - [ ] Cloudflare KV binding used by geocoding exists in each required environment.
 - [ ] Deployment reports success; rollback version is identified.
@@ -83,6 +84,8 @@ Use this checklist for each preview and production release. Record the date, dep
 ## Automated two-account test
 
 Run only against a disposable/staging Supabase project after applying the revision privacy migration and the schema. Create two distinct, non-admin email/password test accounts in that project. Do not point this test at production.
+
+Apply supabase/schema.sql for a fresh local database, or apply migrations 202610120001_revision_privacy_rls.sql and 202610120002_publish_immediately.sql to the intended existing staging database before testing. Confirm the project and backup first.
 
 Set these environment variables locally or as protected CI secrets (never commit credentials):
 - TERRALIVE_TEST_SUPABASE_URL
