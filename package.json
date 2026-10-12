@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:terralive-security": "node scripts/terralive-two-account-smoke.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",
