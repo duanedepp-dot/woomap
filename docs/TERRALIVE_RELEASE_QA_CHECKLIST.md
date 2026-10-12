@@ -43,8 +43,11 @@ Use this checklist for each preview and production release. Record the date, dep
 - [ ] User can draw a valid footprint; invalid geometry is rejected.
 - [ ] Height, type, floors, dimensions and address relation persist.
 - [ ] Preview, cancel, undo/redo and save feedback work.
-- [ ] Draft is not visible as published.
-- [ ] Publish updates another signed-in browser without manual refresh.
+- [ ] Default Save action publishes immediately; success feedback appears only after the database confirms the write.
+- [ ] Anonymous visitors and another signed-in account can read the newly published record.
+- [ ] The owner can update their own record and the update appears in another signed-in browser without manual refresh.
+- [ ] A registered non-owner cannot update/delete the record through the UI or REST API.
+- [ ] The client cannot assign a different owner_id or bypass database geometry/field constraints.
 - [ ] Failed save leaves no partial building or revision.
 - [ ] Concurrent edit shows a conflict instead of silently overwriting.
 - [ ] Revision restore creates a new revision and can be reversed.
@@ -94,15 +97,13 @@ The script creates a uniquely named draft fixture, tests RLS and live publishing
 
 ## Manual two-account acceptance test
 1. Use two distinct, non-admin test accounts in a staging project.
-2. Account A signs in, draws a building, adds an address, and saves a draft.
-3. Account B confirms the draft is not visible and cannot query it through the REST API.
-4. Account A publishes.
-5. Account B sees the building without reloading.
-6. Account B attempts to update/delete Account A's building through the API; it must affect zero rows or return an authorization error.
-7. Account B attempts to change owner_id on a row it owns; the database must reject reassignment.
-8. Account A edits height/footprint and publishes a new revision; Account B sees the canonical building update live.
-9. Account B cannot read Account A's revision history; Account A can read it, with no email field.
-10. Account A deletes a test building; its revision history remains readable by A but not B.
-11. Refresh both sessions and verify canonical state remains consistent.
-12. Interrupt network during save and verify no partial write occurs; retry and inspect the revision count.
-13. Record browser, timestamp, test IDs (not passwords), and results in the PR. Never run destructive tests against production data.
+2. Account A signs in, draws a building, adds an address and saves; the successful save must publish immediately.
+3. Account B and a signed-out browser see the published building without reloading.
+4. Account A edits height/footprint; the save is published immediately and Account B sees the canonical change live.
+5. Account B attempts to update/delete Account A's building through the API; it must affect zero rows or return an authorization error.
+6. Account B attempts to change owner_id on a row it owns; the database must reject reassignment.
+7. Account B cannot read Account A's revision history; Account A can read it, with no email field.
+8. Account A deletes a test building; its revision history remains readable by A but not B.
+9. Refresh both sessions and verify canonical state remains consistent.
+10. Interrupt network during save and verify no partial write occurs; retry and inspect the revision count.
+11. Record browser, timestamp, test IDs (not passwords), and results in the PR. Never run destructive tests against production data.
