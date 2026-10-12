@@ -1,12 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 
 const required = [
-  "TERRALIVE_TEST_SUPABASE_URL",
-  "TERRALIVE_TEST_SUPABASE_KEY",
-  "TERRALIVE_TEST_USER_A_EMAIL",
-  "TERRALIVE_TEST_USER_A_PASSWORD",
-  "TERRALIVE_TEST_USER_B_EMAIL",
-  "TERRALIVE_TEST_USER_B_PASSWORD",
+  "WOOMAP_TEST_SUPABASE_URL",
+  "WOOMAP_TEST_SUPABASE_KEY",
+  "WOOMAP_TEST_USER_A_EMAIL",
+  "WOOMAP_TEST_USER_A_PASSWORD",
+  "WOOMAP_TEST_USER_B_EMAIL",
+  "WOOMAP_TEST_USER_B_PASSWORD",
 ];
 const missing = required.filter((key) => !process.env[key]);
 if (missing.length) {
@@ -14,8 +14,8 @@ if (missing.length) {
   process.exit(2);
 }
 
-const url = process.env.TERRALIVE_TEST_SUPABASE_URL;
-const key = process.env.TERRALIVE_TEST_SUPABASE_KEY;
+const url = process.env.WOOMAP_TEST_SUPABASE_URL;
+const key = process.env.WOOMAP_TEST_SUPABASE_KEY;
 const makeClient = () => createClient(url, key, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
@@ -36,13 +36,13 @@ const waitFor = (promise, ms, label) => new Promise((resolve, reject) => {
 
 try {
   const loginA = await a.auth.signInWithPassword({
-    email: process.env.TERRALIVE_TEST_USER_A_EMAIL,
-    password: process.env.TERRALIVE_TEST_USER_A_PASSWORD,
+    email: process.env.WOOMAP_TEST_USER_A_EMAIL,
+    password: process.env.WOOMAP_TEST_USER_A_PASSWORD,
   });
   if (loginA.error || !loginA.data.user) fail("Account A sign-in", loginA.error?.message ?? "no user");
   const loginB = await b.auth.signInWithPassword({
-    email: process.env.TERRALIVE_TEST_USER_B_EMAIL,
-    password: process.env.TERRALIVE_TEST_USER_B_PASSWORD,
+    email: process.env.WOOMAP_TEST_USER_B_EMAIL,
+    password: process.env.WOOMAP_TEST_USER_B_PASSWORD,
   });
   if (loginB.error || !loginB.data.user) fail("Account B sign-in", loginB.error?.message ?? "no user");
   const userA = loginA.data.user;
@@ -55,8 +55,8 @@ try {
   };
   const inserted = await a.from("buildings").insert({
     owner_id: userA.id,
-    name: "TerraLive security test " + new Date().toISOString(),
-    address: "TerraLive automated test fixture",
+    name: "WooMap security test " + new Date().toISOString(),
+    address: "WooMap automated test fixture",
     building_type: "Apartment",
     height_m: 12,
     footprint_geojson: polygon,
@@ -76,7 +76,7 @@ try {
 
   let liveResolve;
   const liveEvent = new Promise((resolve) => { liveResolve = resolve; });
-  channelB = b.channel("terralive-security-test-" + buildingId)
+  channelB = b.channel("woomap-security-test-" + buildingId)
     .on("postgres_changes", {
       event: "UPDATE", schema: "public", table: "buildings", filter: "id=eq." + buildingId,
     }, (payload) => liveResolve(payload))
@@ -151,9 +151,9 @@ try {
   ensure(!otherHistoryAfterDelete.error && (otherHistoryAfterDelete.data ?? []).length === 0,
     "Other account still cannot read deleted building history");
 
-  console.log(`\nAll ${checks.length} TerraLive two-account checks passed.`);
+  console.log(`\nAll ${checks.length} WooMap two-account checks passed.`);
 } catch (error) {
-  console.error("\nTerraLive security smoke test failed:", error);
+  console.error("\nWooMap security smoke test failed:", error);
   process.exitCode = 1;
 } finally {
   if (channelB) await b.removeChannel(channelB);
