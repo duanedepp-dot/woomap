@@ -37,7 +37,6 @@ alter table public.building_revisions enable row level security;
 revoke all on public.building_revisions from anon;
 revoke select on public.building_revisions from public;
 revoke select on public.building_revisions from authenticated;
-revoke select on public.building_revisions from public;
 grant select (id, building_id, revision, action, editor_id, snapshot, created_at) on public.building_revisions to authenticated;
 drop policy if exists "Read revisions of visible buildings" on public.building_revisions;
 drop policy if exists "Read own building revision history" on public.building_revisions;
