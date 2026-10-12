@@ -2,6 +2,11 @@ name = "terralive"
 pages_build_output_dir = "./dist"
 compatibility_date = "2026-10-12"
 
+[vars]
+# These are public client settings; never place a Supabase service-role key here.
+VITE_SUPABASE_URL = "https://ojjuodlkejnzkzeqcbmf.supabase.co"
+VITE_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_JZFB5oiwNa4XD3neZVAPiA_6vspYtn9"
+
 [[kv_namespaces]]
 binding = "TERRALIVE_CACHE"
 id = "f59989b89a1c481ea84f754070a1d7f3"
