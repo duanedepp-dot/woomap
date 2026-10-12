@@ -1,0 +1,53 @@
+name: TerraLive checks
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, fix/terralive-supabase-build-env]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: TypeScript and production build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Build application
+        run: npm run build
+
+  two-account-security:
+    name: Two-account Supabase authorization and Realtime test
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Run two-account integration test when staging credentials are configured
+        env:
+          TERRALIVE_TEST_SUPABASE_URL: ${{ secrets.TERRALIVE_TEST_SUPABASE_URL }}
+          TERRALIVE_TEST_SUPABASE_KEY: ${{ secrets.TERRALIVE_TEST_SUPABASE_KEY }}
+          TERRALIVE_TEST_USER_A_EMAIL: ${{ secrets.TERRALIVE_TEST_USER_A_EMAIL }}
+          TERRALIVE_TEST_USER_A_PASSWORD: ${{ secrets.TERRALIVE_TEST_USER_A_PASSWORD }}
+          TERRALIVE_TEST_USER_B_EMAIL: ${{ secrets.TERRALIVE_TEST_USER_B_EMAIL }}
+          TERRALIVE_TEST_USER_B_PASSWORD: ${{ secrets.TERRALIVE_TEST_USER_B_PASSWORD }}
+        run: |
+          if [ -z "$TERRALIVE_TEST_SUPABASE_URL" ] || [ -z "$TERRALIVE_TEST_SUPABASE_KEY" ] || [ -z "$TERRALIVE_TEST_USER_A_EMAIL" ] || [ -z "$TERRALIVE_TEST_USER_A_PASSWORD" ] || [ -z "$TERRALIVE_TEST_USER_B_EMAIL" ] || [ -z "$TERRALIVE_TEST_USER_B_PASSWORD" ]; then
+            echo "::warning::Two-account integration test skipped: configure all TERRALIVE_TEST_* repository secrets for a dedicated staging project."
+            echo "Build passed, but this does not count as a passing live security test."
+            exit 0
+          fi
+          npm run test:terralive-security
