@@ -94,7 +94,7 @@ Set these environment variables locally or as protected CI secrets (never commit
 
 Then run: npm run test:terralive-security
 
-The script creates a uniquely named draft fixture, tests RLS and live publishing, then deletes that fixture and checks that its revision history remains private. It must pass before this PR is considered release-ready.
+The script creates a uniquely named published fixture, tests RLS and live cross-account edits, then deletes that fixture and checks that its revision history remains private. It must pass before this PR is considered release-ready.
 
 ## Manual two-account acceptance test
 1. Use two distinct, non-admin test accounts in a staging project.
