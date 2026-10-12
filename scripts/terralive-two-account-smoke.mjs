@@ -28,10 +28,11 @@ const checks = [];
 const pass = (name) => { checks.push({ name, ok: true }); console.log("PASS", name); };
 const fail = (name, detail) => { checks.push({ name, ok: false }); throw new Error(`${name}: ${detail}`); };
 const ensure = (condition, name, detail = "assertion failed") => condition ? pass(name) : fail(name, detail);
-const waitFor = (promise, ms, label) => Promise.race([
-  promise,
-  new Promise((_, reject) => setTimeout(() => reject(new Error(`Timed out: ${label}`)), ms)),
-]);
+const waitFor = (promise, ms, label) => new Promise((resolve, reject) => {
+  const timer = setTimeout(() => reject(new Error(`Timed out: ${label}`)), ms);
+  promise.then((value) => { clearTimeout(timer); resolve(value); },
+    (error) => { clearTimeout(timer); reject(error); });
+});
 
 try {
   const loginA = await a.auth.signInWithPassword({
