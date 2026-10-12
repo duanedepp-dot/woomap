@@ -12,7 +12,7 @@ export async function onRequest(context) {
     });
   }
 
-  const query = (url.searchParams.get("q") || "").trim().replace(/\\s+/g, " ");
+  const query = (url.searchParams.get("q") || "").trim().replace(/\s+/g, " ");
   if (query.length < 2 || query.length > 200) {
     return Response.json({ error: "Enter an address between 2 and 200 characters." }, { status: 400 });
   }
