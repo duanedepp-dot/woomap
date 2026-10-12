@@ -5,7 +5,7 @@ Use this checklist for each preview and production release. Record the date, dep
 ## Build and configuration
 - [ ] CI lint/typecheck/build pass.
 - [ ] Production Pages environment uses the intended Supabase URL and public publishable key from Cloudflare Pages settings.
-- [ ] Branch preview environment has no Supabase credentials until a dedicated staging project is configured.
+- [ ] Branch preview environment uses non-production placeholder Supabase values and VITE_TERRALIVE_PREVIEW_READ_ONLY=true until a dedicated staging project is configured.
 - [ ] Preview and production use separate KV namespaces.
 - [ ] Worker preview uses wrangler.worker.toml and its isolated preview KV namespace; it must not use production Supabase credentials.
 - [ ] No service-role key or private API key appears in the browser bundle, Git history, logs, or public config.
