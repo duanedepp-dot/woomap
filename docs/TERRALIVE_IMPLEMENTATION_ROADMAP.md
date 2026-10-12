@@ -6,7 +6,7 @@
 
 ## Product promise and boundaries
 
-- Changes publish to TerraLive's own dataset after validation and authorization; do not claim to modify Google Maps, Apple Maps, official postal databases, or third-party basemaps.
+- **Publishing method: publish immediately.** After a registered user saves a valid change to a record they own, it is written as `published` and becomes available to other authorized TerraLive users without a moderator/draft approval step. Do not claim to modify Google Maps, Apple Maps, official postal databases, or third-party basemaps.
 - A published record is shared app data, not proof that an address or building is officially verified.
 - Preserve the current architecture: MapLibre GL JS, OpenFreeMap, Supabase Auth, PostgreSQL/PostGIS, Supabase Realtime, Cloudflare Pages/Workers, and a later Three.js interior viewer/editor.
 - Postman is optional QA tooling, not a runtime dependency. A WooMap API is not required unless a separately identified service provides a feature the app actually needs.
@@ -41,7 +41,7 @@
 
 ## Current baseline
 
-The existing app already has a map workspace, address geocoding endpoint, Supabase client/auth code, building geometry and extrusion support, a buildings table, row-level security policies, revision auditing, and a Realtime subscription. A preview configuration/UI fix is being reviewed in PR #2. Do not treat the 3D interior editor, secure cross-account publishing, or production authorization tests as complete until verified.
+The existing app already has a map workspace, address geocoding endpoint, Supabase client/auth code, building geometry and extrusion support, a buildings table, row-level security policies, revision auditing, and a Realtime subscription. PR #2 now specifies immediate publishing and owner-only editing in the editor UI; database RLS remains the actual security boundary. Do not treat secure cross-account publishing or production authorization tests as complete until verified.
 
 ## Delivery phases
 
@@ -66,7 +66,7 @@ The existing app already has a map workspace, address geocoding endpoint, Supaba
 - Keep deletion history accessible to the owner. Prefer archive/soft-delete for user-facing deletion; if hard delete remains, preserve owner access through the revision snapshot.
 - Verify the Realtime publication includes required tables and RLS permits intended subscribers. Test actual events, not just successful WebSocket subscription.
 
-**Exit criteria:** automated allow/deny tests pass for anon, owner, and another authenticated user; changes propagate; reconnect/reload returns the authoritative database state.
+**Exit criteria:** automated allow/deny tests pass for anon, owner, and another authenticated user; owner edits publish immediately; unauthorized users cannot mutate another owner's rows; changes propagate live; reconnect/reload returns the authoritative database state.
 
 ### P2 — Address management as a first-class entity
 
@@ -92,7 +92,7 @@ UX:
 - Validate polygons (closed ring, minimum points, valid geometry, non-zero area, plausible size).
 - Set building type, height in metres, floors, dimensions, name, and linked address.
 - Keep units explicit and convert safely; do not infer floor count solely from height.
-- Preview before saving; support cancel, undo/redo, save draft, publish, and revision restore.
+- Preview and validate before saving; support cancel, undo/redo, immediate publish, and revision restore. If drafts are introduced later, they must be an explicit opt-in feature and must not change the immediate-publish default.
 - Add keyboard and touch controls; avoid relying only on hover.
 - Show draft/published status and conflict warnings.
 - Keep MapLibre extrusions as the fast geographic representation; reserve detailed meshes for selected buildings or interiors.
