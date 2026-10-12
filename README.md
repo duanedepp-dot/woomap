@@ -22,6 +22,6 @@ The repository is configured for a static Vite build:
 - Build command: npm run build
 - Build output directory: dist
 - Supabase variables must be set in the Cloudflare Pages project under Settings → Environment variables for Production (and Preview if used): VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.
-- The public URL is https://terralive.pages.dev.
+- The public URL is https://terralive.pages.dev. Production and Preview must both define `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in Cloudflare Pages.
 
 This is a prototype: footprints are rectangular, public map/address services have usage policies, and the starter SQL does not include moderator approval. Harden security and moderation before production.
