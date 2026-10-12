@@ -76,6 +76,22 @@ Use this checklist for each preview and production release. Record the date, dep
 - [ ] No PII is included in public events or analytics.
 - [ ] Backup and restore path is documented.
 
+## Automated two-account test
+
+Run only against a disposable/staging Supabase project after applying the revision privacy migration and the schema. Create two distinct, non-admin email/password test accounts in that project. Do not point this test at production.
+
+Set these environment variables locally or as protected CI secrets (never commit credentials):
+- TERRALIVE_TEST_SUPABASE_URL
+- TERRALIVE_TEST_SUPABASE_KEY (publishable/anon key only; never service-role)
+- TERRALIVE_TEST_USER_A_EMAIL
+- TERRALIVE_TEST_USER_A_PASSWORD
+- TERRALIVE_TEST_USER_B_EMAIL
+- TERRALIVE_TEST_USER_B_PASSWORD
+
+Then run: npm run test:terralive-security
+
+The script creates a uniquely named draft fixture, tests RLS and live publishing, then deletes that fixture and checks that its revision history remains private. It must pass before this PR is considered release-ready.
+
 ## Manual two-account acceptance test
 1. Use two distinct, non-admin test accounts in a staging project.
 2. Account A signs in, draws a building, adds an address, and saves a draft.
