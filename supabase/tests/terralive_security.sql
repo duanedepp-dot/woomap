@@ -1,4 +1,4 @@
--- TerraLive security regression checks. Run against a disposable/local Supabase DB
+-- WooMap security regression checks. Run against a disposable/local Supabase DB
 -- after applying migrations. These structural checks do not replace two-account API tests.
 do $$
 declare rls_buildings boolean; rls_revisions boolean;
@@ -21,6 +21,6 @@ begin
   if (select column_default from information_schema.columns where table_schema='public' and table_name='buildings' and column_name='status') not like '%published%' then
     raise exception 'FAIL: new buildings must default to published for immediate publishing';
   end if;
-  raise notice 'PASS: TerraLive RLS, revision privacy, and immediate-publish defaults';
+  raise notice 'PASS: WooMap RLS, revision privacy, and immediate-publish defaults';
 end;
 $$;
