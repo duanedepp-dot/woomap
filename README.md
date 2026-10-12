@@ -21,8 +21,10 @@ The repository is configured for a static Vite build:
 - Production branch: main
 - Build command: npm run build
 - Build output directory: dist
-- Supabase variables must be set in the Cloudflare Pages project under Settings → Environment variables for Production (and Preview if used): VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.
-- The current Pages URL remains https://terralive.pages.dev (legacy alias); the Pages project itself is now named WooMap. Production and Preview must both define `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in Cloudflare Pages.
+- For Cloudflare's native Pages build, set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` under Settings → Environment variables for Production.
+- Keep Preview isolated: set `VITE_WOOMAP_PREVIEW_READ_ONLY=true` and use empty or staging-only Supabase values until a dedicated staging project exists. Never point untrusted previews at production data.
+- The current Pages URL remains https://terralive.pages.dev (legacy alias); the Pages project itself is now named WooMap.
+- The manual GitHub Actions deploy builds the browser bundle inside GitHub, so also add repository **Variables** (Settings → Secrets and variables → Actions → Variables): `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. These are public client configuration values, not service-role secrets. The workflow checks that both exist before deploying.
 
 For a manual GitHub Actions deployment, run **Build and deploy WooMap** from the Actions tab. Configure the repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` first. The workflow deploys to the Cloudflare Pages project named `woomap`.
 
