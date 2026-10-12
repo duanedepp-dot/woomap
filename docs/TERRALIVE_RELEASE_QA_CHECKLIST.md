@@ -51,7 +51,8 @@ Use this checklist for each preview and production release. Record the date, dep
 - [ ] Failed save leaves no partial building or revision.
 - [ ] Concurrent edit shows a conflict instead of silently overwriting.
 - [ ] Revision restore creates a new revision and can be reversed.
-- [ ] User cannot edit another person's record without explicit permission.
+- [ ] Editor UI is read-only for another user's building.
+- [ ] User cannot edit another person's record through direct REST requests without explicit permission.
 
 ## Realtime
 - [ ] Required tables are enabled in the Realtime publication or Broadcast design.
