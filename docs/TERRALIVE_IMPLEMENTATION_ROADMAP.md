@@ -1,22 +1,22 @@
-# TerraLive implementation roadmap
+# WooMap implementation roadmap
 
-**Product:** TerraLive  
+**Product:** WooMap  
 **Tagline:** The world, updated live.  
 **Purpose:** A collaborative geographic map where people can propose, edit, and publish address records and building geometry, then explore those buildings in 3D.
 
 ## Product promise and boundaries
 
-- **Publishing method: publish immediately.** After a registered user saves a valid change to a record they own, it is written as `published` and becomes available to other authorized TerraLive users without a moderator/draft approval step. Do not claim to modify Google Maps, Apple Maps, official postal databases, or third-party basemaps.
+- **Publishing method: publish immediately.** After a registered user saves a valid change to a record they own, it is written as `published` and becomes available to other authorized WooMap users without a moderator/draft approval step. Do not claim to modify Google Maps, Apple Maps, official postal databases, or third-party basemaps.
 - A published record is shared app data, not proof that an address or building is officially verified.
 - Preserve the current architecture: MapLibre GL JS, OpenFreeMap, Supabase Auth, PostgreSQL/PostGIS, Supabase Realtime, Cloudflare Pages/Workers, and a later Three.js interior viewer/editor.
 - Postman is optional QA tooling, not a runtime dependency. A WooMap API is not required unless a separately identified service provides a feature the app actually needs.
 
 ## Confirmed product settings
 
-- **Publishing method: publish immediately.** A successful save of a valid building/address change publishes it to TerraLive straight away; no separate review/publish click is required for the default workflow. If a draft mode is ever added later, it must be an explicit opt-in and must not be the default.
+- **Publishing method: publish immediately.** A successful save of a valid building/address change publishes it to WooMap straight away; no separate review/publish click is required for the default workflow. If a draft mode is ever added later, it must be an explicit opt-in and must not be the default.
 - **Editing permissions: registered users can edit and publish their own changes.** An authenticated user may create and edit records they own. They cannot edit, delete, or take ownership of another user's record unless a separately designed sharing/role feature explicitly grants that permission.
 - **Public visibility:** anonymous visitors and other registered users can read published records. Drafts, if introduced later, must not be exposed through public map queries.
-- **Meaning of “live”:** a committed database change becomes canonical in TerraLive and is sent to authorized subscribers through Supabase Realtime; clients update without manual refresh and refetch canonical data after reconnect. This does not update Google Maps, Apple Maps, official postal databases, or OpenFreeMap's source data.
+- **Meaning of “live”:** a committed database change becomes canonical in WooMap and is sent to authorized subscribers through Supabase Realtime; clients update without manual refresh and refetch canonical data after reconnect. This does not update Google Maps, Apple Maps, official postal databases, or OpenFreeMap's source data.
 - **Revision history:** every committed change is audited with actor ID, action, revision and timestamp. Keep revision history private to the building owner and authorized actor; do not expose editor email addresses. Restoring an older revision creates a new revision rather than erasing history.
 
 ## Target architecture (preserve existing choices)
