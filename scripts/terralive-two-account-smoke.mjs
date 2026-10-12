@@ -60,19 +60,19 @@ try {
     building_type: "Apartment",
     height_m: 12,
     footprint_geojson: polygon,
-    status: "draft",
+    status: "published",
   }).select("id").single();
-  if (inserted.error || !inserted.data?.id) fail("Account A creates draft", inserted.error?.message ?? "no row");
+  if (inserted.error || !inserted.data?.id) fail("Account A creates published building", inserted.error?.message ?? "no row");
   buildingId = inserted.data.id;
-  pass("Account A creates a draft");
+  pass("Account A creates and publishes immediately");
 
-  const draftForB = await b.from("buildings").select("id").eq("id", buildingId);
-  if (draftForB.error) fail("Account B cannot read draft", draftForB.error.message);
-  ensure((draftForB.data ?? []).length === 0, "Account B cannot read draft");
-
-  const draftForAnon = await anon.from("buildings").select("id").eq("id", buildingId);
-  if (draftForAnon.error) fail("Anonymous cannot read draft", draftForAnon.error.message);
-  ensure((draftForAnon.data ?? []).length === 0, "Anonymous cannot read draft");
+  const bInitialRead = await b.from("buildings").select("id,status").eq("id", buildingId);
+  if (bInitialRead.error) fail("Account B reads published building", bInitialRead.error.message);
+  ensure((bInitialRead.data ?? []).length === 1 && bInitialRead.data[0].status === "published",
+    "Account B can read published building");
+  const anonInitialRead = await anon.from("buildings").select("id,status").eq("id", buildingId);
+  if (anonInitialRead.error) fail("Anonymous reads published building", anonInitialRead.error.message);
+  ensure((anonInitialRead.data ?? []).length === 1, "Anonymous can read published building");
 
   let liveResolve;
   const liveEvent = new Promise((resolve) => { liveResolve = resolve; });
@@ -95,19 +95,20 @@ try {
     poll();
   }), 9000, "Realtime subscription");
 
-  const published = await a.from("buildings").update({ status: "published" })
-    .eq("id", buildingId).select("id,status").single();
-  if (published.error) fail("Account A publishes", published.error.message);
-  ensure(published.data.status === "published", "Account A publishes");
+  const updated = await a.from("buildings").update({ height_m: 18 })
+    .eq("id", buildingId).select("id,status,height_m").single();
+  if (updated.error) fail("Account A edits own published building", updated.error.message);
+  ensure(updated.data.status === "published" && Number(updated.data.height_m) === 18,
+    "Account A edit is saved without leaving published state");
 
   const event = await waitFor(liveEvent, 10000, "Account B live update event");
-  ensure(!event.__subscriptionError && event.new?.status === "published",
-    "Account B receives live publish event without reload", event.__subscriptionError ?? JSON.stringify(event.new));
+  ensure(!event.__subscriptionError && event.new?.status === "published" && Number(event.new?.height_m) === 18,
+    "Account B receives live edit without reload", event.__subscriptionError ?? JSON.stringify(event.new));
 
-  const bReadsPublished = await b.from("buildings").select("id,status").eq("id", buildingId);
+  const bReadsPublished = await b.from("buildings").select("id,status,height_m").eq("id", buildingId);
   if (bReadsPublished.error) fail("Account B reads published building", bReadsPublished.error.message);
-  ensure((bReadsPublished.data ?? []).length === 1 && bReadsPublished.data[0].status === "published",
-    "Account B reads canonical published building");
+  ensure((bReadsPublished.data ?? []).length === 1 && bReadsPublished.data[0].status === "published" && Number(bReadsPublished.data[0].height_m) === 18,
+    "Account B reads canonical published building and latest edit");
   const anonReadsPublished = await anon.from("buildings").select("id,status").eq("id", buildingId);
   if (anonReadsPublished.error) fail("Anonymous reads published building", anonReadsPublished.error.message);
   ensure((anonReadsPublished.data ?? []).length === 1, "Anonymous can read published building");
