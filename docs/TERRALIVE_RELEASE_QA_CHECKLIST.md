@@ -21,10 +21,13 @@ Use this checklist for each preview and production release. Record the date, dep
 - [ ] Owner can read and edit own permitted records.
 - [ ] Second authenticated user cannot update/delete another user's record.
 - [ ] Ownership cannot be reassigned through client-supplied fields.
-- [ ] Revision table does not reveal email or private data unnecessarily.
-- [ ] Deleted/archived records have intentional history visibility.
+- [ ] Anonymous users have no access to revision history.
+- [ ] Revision history is readable only by the building owner or revision actor.
+- [ ] Revision history contains no editor email or unnecessary personal data.
+- [ ] Deleted building history remains accessible to the owner via snapshot owner ID.
 - [ ] Table grants and RLS policies are both reviewed; policy existence alone is not sufficient.
-- [ ] Automated database tests cover select/insert/update/delete for anon, owner, and non-owner.
+- [ ] Run supabase/tests/terralive_security.sql after migrations.
+- [ ] Behavioral allow/deny tests cover select/insert/update/delete for anon, owner, and non-owner.
 
 ## Map and addresses
 - [ ] Basemap loads with required attribution.
@@ -74,13 +77,16 @@ Use this checklist for each preview and production release. Record the date, dep
 - [ ] Backup and restore path is documented.
 
 ## Manual two-account acceptance test
-1. Account A signs in, draws a building, adds an address, and saves a draft.
-2. Account B confirms the draft is not publicly visible.
-3. Account A publishes.
-4. Account B sees the building without reloading.
-5. Account B tries to edit/delete Account A's building; database authorization denies it.
-6. Account A edits height/footprint and publishes a new revision.
-7. Account B sees the new revision; the history contains no unnecessary email address.
-8. Account A restores the previous revision; the restore creates another revision.
-9. Refresh both sessions and verify canonical state remains consistent.
-10. Repeat with network interruption during save and verify no partial write occurs.
+1. Use two distinct, non-admin test accounts in a staging project.
+2. Account A signs in, draws a building, adds an address, and saves a draft.
+3. Account B confirms the draft is not visible and cannot query it through the REST API.
+4. Account A publishes.
+5. Account B sees the building without reloading.
+6. Account B attempts to update/delete Account A's building through the API; it must affect zero rows or return an authorization error.
+7. Account B attempts to change owner_id on a row it owns; the database must reject reassignment.
+8. Account A edits height/footprint and publishes a new revision; Account B sees the canonical building update live.
+9. Account B cannot read Account A's revision history; Account A can read it, with no email field.
+10. Account A deletes a test building; its revision history remains readable by A but not B.
+11. Refresh both sessions and verify canonical state remains consistent.
+12. Interrupt network during save and verify no partial write occurs; retry and inspect the revision count.
+13. Record browser, timestamp, test IDs (not passwords), and results in the PR. Never run destructive tests against production data.
