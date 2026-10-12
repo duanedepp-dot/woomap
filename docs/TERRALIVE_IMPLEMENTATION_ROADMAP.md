@@ -11,6 +11,34 @@
 - Preserve the current architecture: MapLibre GL JS, OpenFreeMap, Supabase Auth, PostgreSQL/PostGIS, Supabase Realtime, Cloudflare Pages/Workers, and a later Three.js interior viewer/editor.
 - Postman is optional QA tooling, not a runtime dependency. A WooMap API is not required unless a separately identified service provides a feature the app actually needs.
 
+## Confirmed product settings
+
+- **Publishing method: publish immediately.** A successful save of a valid building/address change publishes it to TerraLive straight away; no separate review/publish click is required for the default workflow. If a draft mode is ever added later, it must be an explicit opt-in and must not be the default.
+- **Editing permissions: registered users can edit and publish their own changes.** An authenticated user may create and edit records they own. They cannot edit, delete, or take ownership of another user's record unless a separately designed sharing/role feature explicitly grants that permission.
+- **Public visibility:** anonymous visitors and other registered users can read published records. Drafts, if introduced later, must not be exposed through public map queries.
+- **Meaning of “live”:** a committed database change becomes canonical in TerraLive and is sent to authorized subscribers through Supabase Realtime; clients update without manual refresh and refetch canonical data after reconnect. This does not update Google Maps, Apple Maps, official postal databases, or OpenFreeMap's source data.
+- **Revision history:** every committed change is audited with actor ID, action, revision and timestamp. Keep revision history private to the building owner and authorized actor; do not expose editor email addresses. Restoring an older revision creates a new revision rather than erasing history.
+
+## Target architecture (preserve existing choices)
+
+- **Map UI:** MapLibre GL JS; **basemap:** OpenFreeMap with required attribution.
+- **Data and identity:** Supabase Auth, PostgreSQL and PostGIS. Database Row Level Security (RLS) is the source of truth for read/write permissions.
+- **Live updates:** Supabase Realtime. Keep Postgres Changes for the MVP if the two-account tests pass; evaluate private Broadcast channels as usage grows.
+- **Hosting/API:** Cloudflare Pages and Workers, retaining existing KV bindings and geocoding endpoint. Public browser config may include only the Supabase URL and publishable/anon key—never the service-role key.
+- **3D:** keep MapLibre building extrusions for the city-scale overview; use validated editable footprints and dimensions; introduce Three.js for selected-building detail and a later room/interior editor. Keep heavy 3D code and assets lazy-loaded and store large assets in object storage rather than oversized database rows.
+
+## Publish-immediately write contract
+
+1. A signed-in user draws or selects a building and edits its name, address, type, height or footprint.
+2. The client validates required fields and geometry, then submits a single authenticated write with the current user's ID as owner.
+3. The database checks RLS and constraints, normalizes/validates geometry, updates the revision/version, and records an audit revision in the same transaction.
+4. The saved row is marked `published` for the default workflow. If the write fails, the UI reports the error and does not claim success.
+5. Authorized Realtime subscribers receive a minimal change signal and refresh the canonical row; a second session sees the change without manual refresh.
+6. On reconnect, the client refetches canonical published records so missed events are recovered.
+7. Concurrent edits must use a revision/version or `updated_at` check so one user's edit cannot silently overwrite a newer version.
+
+**Security rule:** hiding controls in the UI is not authorization. The database must reject cross-owner update/delete and owner reassignment even when requests are made directly through the REST API.
+
 ## Current baseline
 
 The existing app already has a map workspace, address geocoding endpoint, Supabase client/auth code, building geometry and extrusion support, a buildings table, row-level security policies, revision auditing, and a Realtime subscription. A preview configuration/UI fix is being reviewed in PR #2. Do not treat the 3D interior editor, secure cross-account publishing, or production authorization tests as complete until verified.
@@ -30,12 +58,12 @@ The existing app already has a map workspace, address geocoding endpoint, Supaba
 ### P1 — Secure collaborative publishing
 
 - Test registration, sign-in, sign-out, expired sessions, and errors.
-- Test account A creates and publishes a building; account B sees it without reload.
+- Test account A saves a valid building change and it is published immediately; account B sees it without reload.
 - Test account B cannot update/delete account A's building without an explicit permission.
 - Use database RLS as the authorization boundary; UI-only restrictions do not count.
 - Add optimistic concurrency (compare revision/updated_at) to prevent silent overwrites.
 - Make save/publish atomic. A failed write must not partially update the building or revision.
-- Keep deletion history accessible. Prefer archive/soft-delete for user-facing deletion; if hard delete remains, design revision access that does not accidentally make history disappear.
+- Keep deletion history accessible to the owner. Prefer archive/soft-delete for user-facing deletion; if hard delete remains, preserve owner access through the revision snapshot.
 - Verify the Realtime publication includes required tables and RLS permits intended subscribers. Test actual events, not just successful WebSocket subscription.
 
 **Exit criteria:** automated allow/deny tests pass for anon, owner, and another authenticated user; changes propagate; reconnect/reload returns the authoritative database state.
