@@ -1,0 +1,7 @@
+name = "terralive"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-10-12"
+
+[[kv_namespaces]]
+binding = "TERRALIVE_CACHE"
+id = "f59989b89a1c481ea84f754070a1d7f3"
