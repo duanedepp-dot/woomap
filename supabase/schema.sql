@@ -35,6 +35,7 @@ create table if not exists public.building_revisions(id bigint generated always 
 create index if not exists building_revisions_building_idx on public.building_revisions(building_id,revision desc);
 alter table public.building_revisions enable row level security;
 revoke all on public.building_revisions from anon;
+revoke select on public.building_revisions from public;
 revoke select on public.building_revisions from authenticated;
 revoke select on public.building_revisions from public;
 grant select (id, building_id, revision, action, editor_id, snapshot, created_at) on public.building_revisions to authenticated;
