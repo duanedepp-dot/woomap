@@ -42,7 +42,7 @@ export async function onRequest(context) {
     const response = await fetch(upstream, {
       headers: {
         "Accept": "application/json",
-        "User-Agent": "WooMap/1.0 (address search; https://woomap.pages.dev)",
+        "User-Agent": "WooMap/1.0 (address search; https://terralive.pages.dev)",
       },
     });
     if (!response.ok) {
