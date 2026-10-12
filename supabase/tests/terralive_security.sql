@@ -11,7 +11,7 @@ begin
     raise exception 'FAIL: revision table still stores editor_email';
   end if;
   if has_table_privilege('anon','public.building_revisions','SELECT') then raise exception 'FAIL: anon must not have SELECT on building revisions'; end if;
-  if has_table_privilege('public','public.building_revisions','SELECT') then raise exception 'FAIL: PUBLIC must not have SELECT on building revisions'; end if;
+  if exists (select 1 from pg_class c join pg_namespace n on n.oid=c.relnamespace cross join lateral aclexplode(coalesce(c.relacl, acldefault('r',c.relowner))) a where n.nspname='public' and c.relname='building_revisions' and a.grantee=0 and a.privilege_type='SELECT') then raise exception 'FAIL: PUBLIC must not have SELECT on building revisions'; end if;
   if not has_column_privilege('authenticated','public.building_revisions','snapshot','SELECT') then raise exception 'FAIL: authenticated history readers need snapshot access'; end if;
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='building_revisions' and policyname='Read own building revision history' and roles @> array['authenticated']::name[]) then
     raise exception 'FAIL: owner/actor-only revision RLS policy is missing';
