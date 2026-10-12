@@ -1,7 +1,7 @@
 import {useEffect,useRef} from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-export type Building={id:string;name:string;address:string;building_type:string;height_m:number;status:"draft"|"published";coordinates:number[][]};
+export type Building={id:string;owner_id?:string;name:string;address:string;building_type:string;height_m:number;status:"draft"|"published";coordinates:number[][]};
 type Props={buildings:Building[];selectedId:string|null;drawing:boolean;center:[number,number]|null;onSelect:(id:string)=>void;onDraw:(coords:number[][])=>void};
 const SOURCE="woomap-buildings";
 const collection=(items:Building[])=>({type:"FeatureCollection" as const,features:items.map(b=>({type:"Feature" as const,id:b.id,properties:{id:b.id,name:b.name,height:b.height_m,status:b.status},geometry:{type:"Polygon" as const,coordinates:[b.coordinates]}}))});

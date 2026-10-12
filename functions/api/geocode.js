@@ -12,25 +12,25 @@ export async function onRequest(context) {
     });
   }
 
-  const query = (url.searchParams.get("q") || "").trim().replace(/\\s+/g, " ");
+  const query = (url.searchParams.get("q") || "").trim().replace(/\s+/g, " ");
   if (query.length < 2 || query.length > 200) {
     return Response.json({ error: "Enter an address between 2 and 200 characters." }, { status: 400 });
   }
 
   const cacheKey = CACHE_PREFIX + query.toLocaleLowerCase();
   try {
-    const cached = await env.TERRALIVE_CACHE.get(cacheKey);
+    const cached = await env.WOOMAP_CACHE.get(cacheKey);
     if (cached) {
       return new Response(cached, {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
           "Cache-Control": "public, max-age=300",
-          "X-TerraLive-Cache": "HIT",
+          "X-WooMap-Cache": "HIT",
         },
       });
     }
   } catch (error) {
-    console.error("TerraLive KV read failed:", error);
+    console.error("WooMap KV read failed:", error);
   }
 
   const upstream = new URL("https://nominatim.openstreetmap.org/search");
@@ -42,7 +42,7 @@ export async function onRequest(context) {
     const response = await fetch(upstream, {
       headers: {
         "Accept": "application/json",
-        "User-Agent": "TerraLive/1.0 (address search; https://terralive.pages.dev)",
+        "User-Agent": "WooMap/1.0 (address search; https://terralive.pages.dev)",
       },
     });
     if (!response.ok) {
@@ -52,20 +52,20 @@ export async function onRequest(context) {
     const results = await response.json();
     const body = JSON.stringify(results);
     try {
-      await env.TERRALIVE_CACHE.put(cacheKey, body, { expirationTtl: CACHE_TTL_SECONDS });
+      await env.WOOMAP_CACHE.put(cacheKey, body, { expirationTtl: CACHE_TTL_SECONDS });
     } catch (error) {
-      console.error("TerraLive KV write failed:", error);
+      console.error("WooMap KV write failed:", error);
     }
 
     return new Response(body, {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
         "Cache-Control": "public, max-age=300",
-        "X-TerraLive-Cache": "MISS",
+        "X-WooMap-Cache": "MISS",
       },
     });
   } catch (error) {
-    console.error("TerraLive geocoding failed:", error);
+    console.error("WooMap geocoding failed:", error);
     return Response.json({ error: "Could not search addresses right now." }, { status: 502 });
   }
 }

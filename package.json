@@ -1,12 +1,13 @@
 {
-  "name": "terralive",
+  "name": "woomap",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:woomap-security": "node scripts/woomap-two-account-smoke.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",
