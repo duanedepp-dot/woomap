@@ -10,3 +10,13 @@ VITE_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_JZFB5oiwNa4XD3neZVAPiA_6vspYtn9"
 [[kv_namespaces]]
 binding = "TERRALIVE_CACHE"
 id = "f59989b89a1c481ea84f754070a1d7f3"
+
+# Worker preview builds must not connect to the production Supabase project.
+# Configure dedicated staging values before enabling preview publishing.
+[previews.vars]
+VITE_SUPABASE_URL = ""
+VITE_SUPABASE_PUBLISHABLE_KEY = ""
+
+[[previews.kv_namespaces]]
+binding = "TERRALIVE_CACHE"
+id = "a3f1a0d2321e4cd5a0881a65ce6e4ee8"
