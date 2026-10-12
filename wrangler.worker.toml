@@ -11,5 +11,5 @@ VITE_SUPABASE_URL = ""
 VITE_SUPABASE_PUBLISHABLE_KEY = ""
 
 [[previews.kv_namespaces]]
-binding = "TERRALIVE_CACHE"
+binding = "WOOMAP_CACHE"
 id = "a3f1a0d2321e4cd5a0881a65ce6e4ee8"
