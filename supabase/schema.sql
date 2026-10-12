@@ -31,18 +31,22 @@ begin
 end; $$;
 drop trigger if exists buildings_geometry_trigger on public.buildings;
 create trigger buildings_geometry_trigger before insert or update on public.buildings for each row execute function public.sync_building_geometry();
-create table if not exists public.building_revisions(id bigint generated always as identity primary key,building_id uuid not null,revision integer not null,action text not null,editor_id uuid,editor_email text,snapshot jsonb not null,created_at timestamptz not null default now());
+create table if not exists public.building_revisions(id bigint generated always as identity primary key,building_id uuid not null,revision integer not null,action text not null,editor_id uuid,snapshot jsonb not null,created_at timestamptz not null default now());
 create index if not exists building_revisions_building_idx on public.building_revisions(building_id,revision desc);
 alter table public.building_revisions enable row level security;
-grant select on public.building_revisions to authenticated;
+revoke all on public.building_revisions from anon;
+revoke select on public.building_revisions from authenticated;
+revoke select on public.building_revisions from public;
+grant select (id, building_id, revision, action, editor_id, snapshot, created_at) on public.building_revisions to authenticated;
 drop policy if exists "Read revisions of visible buildings" on public.building_revisions;
-create policy "Read revisions of visible buildings" on public.building_revisions for select to authenticated using(exists(select 1 from public.buildings b where b.id=building_id and (b.status='published' or b.owner_id=(select auth.uid()))));
+drop policy if exists "Read own building revision history" on public.building_revisions;
+create policy "Read own building revision history" on public.building_revisions for select to authenticated using (editor_id=(select auth.uid()) or snapshot->>'owner_id'=(select auth.uid())::text);
 create or replace function public.audit_building_change() returns trigger language plpgsql security definer set search_path='' as $$
 declare snap jsonb; rev integer; act text; bid uuid;
 begin
  if tg_op='DELETE' then snap:=to_jsonb(old);rev:=old.revision+1;act:='deleted';bid:=old.id;
  else snap:=to_jsonb(new);rev:=new.revision;bid:=new.id;if tg_op='INSERT' then act:='created';elsif old.status is distinct from new.status and new.status='published' then act:='published';else act:='updated';end if;end if;
- insert into public.building_revisions(building_id,revision,action,editor_id,editor_email,snapshot) values(bid,rev,act,(select auth.uid()),(select auth.jwt()->>'email'),snap);
+ insert into public.building_revisions(building_id,revision,action,editor_id,snapshot) values(bid,rev,act,(select auth.uid()),snap);
  if tg_op='DELETE' then return old;end if;return new;
 end; $$;
 drop trigger if exists buildings_audit_trigger on public.buildings;
